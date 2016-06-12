@@ -1,4 +1,10 @@
 
+
+void gpsInitPower() {
+  
+}
+
+
 // Check everything is ok
 //AT <-- AT\nOK
 

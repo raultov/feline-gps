@@ -27,3 +27,9 @@
 *.exe
 *.out
 *.app
+
+# Specific files
+api_conf.h
+
+# Folders
+doc/
