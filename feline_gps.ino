@@ -14,8 +14,13 @@
 
 #include <SoftwareSerial.h>
 #include "gps.h"
+#include "network.h"
 
 SoftwareSerial mySerial(10, 16); // RX, TX
+Point point;
+
+// User Token to access API methods
+String userToken = "";
 
 void setup()  
 {
@@ -35,9 +40,7 @@ void setup()
 
   // Start GPS
   gpsPowerOn(&mySerial);
-  //mySerial.write("AT+CGNSPWR=1\n");
   delay(1000);
-  //mySerial.write("AT+CGNSTST=1\n");
 }
 
 void loop() // run over and over
@@ -58,30 +61,19 @@ void loop() // run over and over
     Serial.write(mySerial.read()); 
   */
   
-  Point * point = gpsGetPoint(&mySerial);
+  gpsGetPoint(&point, &mySerial);
   
-  if (point != NULL) {
-    Serial.println(point->ggaLatitude);
-    Serial.println(point->ggaLongitude);
-    Serial.println(point->accuracy);
-    Serial.println(point->altitude);
-  } else {
+    if (point.ggaLatitude.length() == 0) {
+    // return null pointer when time was over and no valid point could be found
     Serial.println(F("point is null")); 
+  } else {
+    Serial.println(F("Point:"));
+    Serial.println(point.ggaLatitude);
+    Serial.println(point.ggaLongitude);
+    Serial.println(point.accuracy);
+    Serial.println(point.altitude);    
   }
-  
-  /*
-  if (mySerial.available())
-    Serial.write(mySerial.read());
-    
-  if (Serial.available())
-  { 
-    while(Serial.available())
-    {
-      mySerial.write(Serial.read());
-    }
-    mySerial.println();
-  }
-  */
+
   
 }
 

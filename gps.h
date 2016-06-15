@@ -1,14 +1,13 @@
-
 #ifndef _GPS_
 #define _GPS_1
 
 // GPGGA,180341.000,4025.7288,N,00338.5588,W,1,5,2.90,676.1,M,51.7,M,,*44
 
 typedef struct Point {
-  String ggaLatitude = "";
-  String ggaLongitude = "";
-  String accuracy = "";
-  String altitude = "";
+  String ggaLatitude = String("");
+  String ggaLongitude = String("");
+  String accuracy = String("");
+  String altitude = String("");
 };
 
 /**
@@ -31,6 +30,6 @@ void gpsPowerOff(SoftwareSerial * mySerial);
   This method must be called after calling gpsPowerOn
   mySerial must have been initialized by calling method begin(baudrate)  
 */
-Point * gpsGetPoint(SoftwareSerial * mySerial);
+void gpsGetPoint(Point * point, SoftwareSerial * mySerial);
 
 #endif 

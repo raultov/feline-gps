@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <SoftwareSerial.h>
 #include "gps.h"
+#include "api_conf.h"
 
 #define DATA_TIMEOUT 120000L
 #define GPGGA "GPGGA"
@@ -14,34 +15,36 @@ String gpsChecksumNMEA0183(const String s) {
       i++; 
     }
 
-/*
-    while(*s)
-        c ^= *s++;
-*/
-
-    return String(c, HEX);;
+    String string = String(c, HEX);
+    string.toUpperCase();
+    return string;
 }
 
 void gpsPowerOn(SoftwareSerial * mySerial) {
-  mySerial->write("AT+CGNSPWR=1\n");
+  mySerial->println("AT+CGNSPWR=1");
 }
 
 void gpsPowerOff(SoftwareSerial * mySerial) {
-  mySerial->write("AT+CGNSPWR=0\n");
+  mySerial->println("AT+CGNSPWR=0");
 }
 
-Point * gpsGetPoint(SoftwareSerial * mySerial) {
-  Point point;
+void gpsGetPoint(Point * point, SoftwareSerial * mySerial) {
   bool found = false;
   String string = String(GPGGA);
   
+  // reset point
+  point->ggaLatitude = String("");
+  point->ggaLongitude = String("");
+  point->accuracy = String("");
+  point->altitude = String("");
+  
   // start receiving GPS data
-  mySerial->write("AT+CGNSTST=1\n");
+  mySerial->println("AT+CGNSTST=1");
 
   int i = 0;
   int numCommas = 0;
   unsigned long lastTime = millis();
-  while (!found && millis() < (millis() - lastTime) < DATA_TIMEOUT) {
+  while (!found && (millis() - lastTime) < DATA_TIMEOUT) {
     
     // barrier to assure serial data available
     while (!mySerial->available() && (millis() - lastTime) < DATA_TIMEOUT);
@@ -63,7 +66,7 @@ Point * gpsGetPoint(SoftwareSerial * mySerial) {
       
       if (c == ',') {
         numCommas++;
-      } else if (c == '*') { 
+      } else if (c == '*') {
         // Start receiving checksum
         int j = 0;
         String checksum = "";
@@ -81,7 +84,7 @@ Point * gpsGetPoint(SoftwareSerial * mySerial) {
         Serial.println(checksum);        
         
         if (checksum.equals(expectedChecksum)) {
-          if (point.ggaLatitude.length() > 0 && point.ggaLongitude.length() > 0) {
+          if (point->ggaLatitude.length() > 0 && point->ggaLongitude.length() > 0) {
             // Checksum is OK and latitude and longitude have valid data
             found = true;
           }
@@ -91,27 +94,30 @@ Point * gpsGetPoint(SoftwareSerial * mySerial) {
           // Either checksum is wrong or latitude and longitude are invalid
           // Reset search algorithm
           i = 0;
-          point.ggaLatitude = "";
-          point.ggaLongitude = "";
-          point.accuracy = "";
-          point.altitude = "";
+          point->ggaLatitude = String("");
+          point->ggaLongitude = String("");
+          point->accuracy = String("");
+          point->altitude = String("");
           string = String(GPGGA);
           numCommas = 0;
+          
+          // jump into next iteration
+          continue;
         }
         
       } else {
         if (numCommas == 2) {
           // Store latitude
-          point.ggaLatitude += c;
+          point->ggaLatitude += (char) c;
         } else if (numCommas == 4) {
           // Store longitude
-          point.ggaLongitude += c;
+          point->ggaLongitude += (char) c;
         } else if (numCommas == 8) {
           // Store accuracy
-          point.accuracy += c;
+          point->accuracy += (char) c;
         } else if (numCommas == 9) {
           // Store altitude
-          point.altitude += c;
+          point->altitude += (char) c;
         }
       }
       
@@ -121,14 +127,7 @@ Point * gpsGetPoint(SoftwareSerial * mySerial) {
   }
 
   // stop receiving GPS data
-  mySerial->write("AT+CGNSTST=0\n");  
-  
-  if (!found) {
-    // return null pointer when time was over and no valid point could be found
-    return NULL; 
-  }
-  
-  return &point; 
+  mySerial->println("AT+CGNSTST=0");  
 }
 
 
