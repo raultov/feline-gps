@@ -15,6 +15,7 @@
 #include <SoftwareSerial.h>
 #include "gps.h"
 #include "network.h"
+#include "api_conf.h"
 
 SoftwareSerial mySerial(10, 16); // RX, TX
 Point point;
@@ -37,33 +38,29 @@ void setup()
   mySerial.begin(9600);
   
   delay(1000);
+  
+  // Enable GPRS module security
+  networkSetPinCode(PHONE_PIN_CODE, &mySerial);
+  delay(1000);
 
   // Start GPS
   gpsPowerOn(&mySerial);
   delay(1000);
+  
+  initializeConnection(&mySerial); 
 }
 
-void loop() // run over and over
-{
-  /*
-  if (Serial.available()) {
-    switch(Serial.read()) {
-      case 'r':
-         Serial.println(F("hola"));
-         gpsPowerOn(mySerial);
-        break;
-    }
-  } 
- */
+void loop() { // run over and over
 
-/*
-  if (mySerial.available())
-    Serial.write(mySerial.read()); 
-  */
+  while (userToken.length() == 0) {
+    networkSetUserToken(&mySerial);
+  }
+    
+  Serial.println(userToken);
   
   gpsGetPoint(&point, &mySerial);
   
-    if (point.ggaLatitude.length() == 0) {
+  if (point.ggaLatitude.length() == 0) {
     // return null pointer when time was over and no valid point could be found
     Serial.println(F("point is null")); 
   } else {
@@ -71,9 +68,19 @@ void loop() // run over and over
     Serial.println(point.ggaLatitude);
     Serial.println(point.ggaLongitude);
     Serial.println(point.accuracy);
-    Serial.println(point.altitude);    
+    Serial.println(point.altitude);   
+ 
+    // TODO put here a while to make sure that the point is uploaded
+    bool status = uploadPoint(&point, &mySerial); 
+    if (status) {
+      Serial.println(F("Point uploaded successfully")); 
+    } else {
+      Serial.println(F("Point could not be uploaded"));
+    }
   }
 
+  if (mySerial.available())
+    Serial.write(mySerial.read()); 
   
 }
 
