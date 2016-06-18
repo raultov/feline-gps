@@ -5,6 +5,8 @@
 #include "api_conf.h"
 
 #define DATA_TIMEOUT 10000L
+// Request constants
+#define CONTENT_TYPE_API "\"application/x-www-form-urlencoded\""
 // Response constants
 #define ACCESS_TOKEN "access_token\":\""
 #define HTTP_STATUS_OK "200"

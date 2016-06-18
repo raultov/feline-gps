@@ -106,10 +106,10 @@ void gpsGetPoint(Point * point, SoftwareSerial * mySerial) {
         }
         
       } else {
-        if (numCommas == 2) {
+        if (numCommas == 2 || numCommas == 3) {
           // Store latitude
           point->ggaLatitude += (char) c;
-        } else if (numCommas == 4) {
+        } else if (numCommas == 4 || numCommas == 5) {
           // Store longitude
           point->ggaLongitude += (char) c;
         } else if (numCommas == 8) {

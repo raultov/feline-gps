@@ -76,6 +76,7 @@ void loop() { // run over and over
       Serial.println(F("Point uploaded successfully")); 
     } else {
       Serial.println(F("Point could not be uploaded"));
+      networkSetUserToken(&mySerial);
     }
   }
 
