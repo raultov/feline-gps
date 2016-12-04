@@ -1,0 +1,22 @@
+#ifndef _API_CONF_
+#define _API_CONF_1
+
+/** 
+  Here put code to configure API calls
+*/
+
+// General constants
+#define PHONE_PIN_CODE "your_own_pin_code"
+#define APN "\"your_own_apn\""
+
+// User Token constants
+#define URL_TOKEN_API "\"your_own_api\""
+#define HEADER_TOKEN_API1 "\"Authorization: Basic your_own_base64_auth_client"
+#define HEADER_TOKEN_API2 "your_own_base64_auth_user\""
+#define BODY1 "grant_type=password&username=your_own_username"
+#define BODY2 "&password=your_own_password&scope=general"
+
+// Upload point constants
+#define URL_UPLOAD_POINT_API "\"your_own_upload_point\""
+
+#endif
